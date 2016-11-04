@@ -11,6 +11,7 @@ git-wfd-eureka:
   parameters:
     #repo_name: "refarch-cloudnative-netflix-eureka"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-eureka"
+    type: link
     has_issues: false
 
 #git-wfd-zuul:
