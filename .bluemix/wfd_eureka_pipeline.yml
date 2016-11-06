@@ -27,7 +27,7 @@ stages:
 
 - name: Build Docker Image
   inputs:
-  - type: build
+  - type: job
     stage: Build Java Projects
     job: Build Java
   triggers:
@@ -118,7 +118,7 @@ stages:
       space: ${SPACE}
     DEPLOY_TYPE: simple
     PORT: ${PORT}
-    NAME: ${NAME}
+    CONTAINER_NAME: ${NAME}
     COMMAND: |-
         #!/bin/bash
         # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
@@ -201,7 +201,7 @@ stages:
       space: ${SPACE}
     DEPLOY_TYPE: simple
     PORT: ${PORT}
-    NAME: ${SERVICE_DISCOVERY_UPS}
+    CONTAINER_NAME: ${SERVICE_DISCOVERY_UPS}
     COMMAND: |-
       #!/bin/bash -x
 
