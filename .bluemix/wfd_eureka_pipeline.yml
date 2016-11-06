@@ -2,7 +2,7 @@
 stages:
 - name: Build Java Projects
   inputs:
-  - service: ${REPO}
+  - url: ${REPO}
     type: git
     branch: BUILD
   triggers:

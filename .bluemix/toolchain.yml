@@ -84,7 +84,7 @@ pipeline-wfd-eureka:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/eureka-0.0.1-SNAPSHOT.jar"
-       REPO: "git-wfd-eureka"
+       REPO: "{{git-wfd-eureka.parameters.repo_url}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
