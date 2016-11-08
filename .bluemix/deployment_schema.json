@@ -22,12 +22,7 @@
             "type": "string"
         }
     },
-    "required": [
-        "deploy-region",
-        "deploy-org",
-        "deploy-space",
-        "route-domain"
-        ],
+    "required": ["deploy-region", "deploy-org", "deploy-space", "route-domain"],
     "form": [
         {
             "type": "validator",
