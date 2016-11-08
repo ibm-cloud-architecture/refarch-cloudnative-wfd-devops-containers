@@ -70,6 +70,14 @@ git-wfd-eureka:
     type: clone
     has_issues: false
 
+git-wfd-config-server:
+  service_id: githubpublic
+  parameters:
+    repo_name: "config-clone"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-spring-config"
+    type: clone
+    has_issues: false
+
 # Pipelines
 pipeline-wfd-eureka:
   service_id: pipeline
@@ -102,6 +110,39 @@ pipeline-wfd-eureka:
        BRIDGE_APP: "container_brige_app"
       execute: false
     services: ["git-wfd-eureka"]
+  hidden: [form, description]
+
+pipeline-wfd-config:
+  service_id: pipeline
+  parameters:
+    name: "wfd-config"
+    ui-pipeline: true
+    configuration:
+      content: $file(wfd_config_server_pipeline.yml)
+      env:
+       # Build java stage env variables
+       DOCKER_DIR: "docker"
+       BUILD_TARGET: "build/libs/config-server-0.0.1-SNAPSHOT.jar"
+       REPO: "git-wfd-config-server"
+       # Build container stage env variables
+       REGION: "{{deploy.parameters.deploy-region}}"
+       ORG: "{{deploy.parameters.deploy-org}}"
+       SPACE: "{{deploy.parameters.deploy-space}}"
+       NAME: "{{pipeline-wfd-config.parameters.name}}"
+       LABEL_PREFIX: "toolchain"
+       # Deploy stage env variables
+       PORT: "8888"
+       MIN_INSTANCES: "1"
+       MAX_INSTANCES: "2"
+       DESIRED_INSTANCES: "1"
+       CONCURRENT_VERSIONS: "1"
+       #AUTO_RECOVERY: "false"
+       CONTAINER_SIZE: "micro"
+       #IGNORE_MAPPING_ROUTE: "true"
+       CONFIG_SERVER_UPS: "config-server-ic"
+       BRIDGE_APP: "container_brige_app"
+      execute: false
+    services: ["git-wfd-config-server"]
   hidden: [form, description]
 
 deploy:
