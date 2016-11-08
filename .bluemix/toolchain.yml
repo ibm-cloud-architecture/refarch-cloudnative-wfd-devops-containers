@@ -1,19 +1,3 @@
-
----
-name: "What is for dinner Toolchain"
-description: "Microservices sample application"
-version: 0.1
-required:
- - deploy
-
-git-wfd-eureka:
-  service_id: githubpublic
-  parameters:
-    repo_name: "eureka-toolchain-test"
-    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-eureka"
-    type: clone
-    has_issues: false
-
 #git-wfd-zuul:
 #  service_id: githubpublic
 #  parameters:
@@ -70,21 +54,35 @@ git-wfd-eureka:
 #    type: clone
 #    has_issues: false
 
+---
+name: "What is for dinner Toolchain"
+description: "Microservices sample application"
+version: 0.1
+required:
+ - deploy
 
+# Github repos
+git-wfd-eureka:
+  service_id: githubpublic
+  parameters:
+    repo_name: "eureka-clone"
+    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-eureka
+    type: clone
+    has_issues: false
+
+# Pipelines
 pipeline-wfd-eureka:
   service_id: pipeline
-  hidden: [form, description]
   parameters:
     name: "wfd-eureka"
     ui-pipeline: true
-    services: ["git-wfd-eureka"]
     configuration:
-      content: $file(wfd_eureka_pipeline.yml)
+      content: $file(pipeline.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/eureka-0.0.1-SNAPSHOT.jar"
-       REPO: "{{git-wfd-eureka.parameters.repo_url}}"
+       REPO: "git-wfd-eureka"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
@@ -97,16 +95,18 @@ pipeline-wfd-eureka:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       AUTO_RECOVERY: false
+       #AUTO_RECOVERY: "false"
        CONTAINER_SIZE: "micro"
-       IGNORE_MAPPING_ROUTE: "true"
+       #IGNORE_MAPPING_ROUTE: "true"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
        BRIDGE_APP: "container_brige_app"
       execute: false
-
+    services: ["git-wfd-eureka"]
+  hidden: [form, description]
 
 deploy:
-  schema: deployment_schema.json
+  schema:
+    $ref: deployment_schema.json
   service-category: pipeline
   parameters:
     deploy-region: "{{region}}"
