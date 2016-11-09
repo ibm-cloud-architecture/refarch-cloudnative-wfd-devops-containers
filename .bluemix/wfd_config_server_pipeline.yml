@@ -122,7 +122,7 @@ stages:
   inputs:
   - type: job
     stage: Build Docker Image
-    job: Build Container
+    job: Build container
     dir_name: null
   triggers:
   - type: stage
