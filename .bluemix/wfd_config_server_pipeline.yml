@@ -266,9 +266,9 @@ stages:
       echo "Config Server container IP address: $CS_IP_ADDRESS"
 
       if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS})" ]; then
-        cf create-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://$CS_IP_ADDRESS:${CS_PORT}/\"}"
+        cf create-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://$CS_IP_ADDRESS:${PORT}/\"}"
       else
-        cf update-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://$CS_IP_ADDRESS:${CS_PORT}/\"}";
+        cf update-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://$CS_IP_ADDRESS:${PORT}/\"}";
       fi
   - name: Deploy Bridge app
     type: deployer
