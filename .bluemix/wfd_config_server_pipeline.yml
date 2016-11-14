@@ -282,17 +282,23 @@ stages:
       echo "[BEGIN]: Bind to Bridge App"
 
       if [ -z "$(cf apps | grep ${BRIDGE_APP})" ]; then
-      	echo "[ERROR]: The container bridge app does not exists."
-      	echo "[ERROR]: Please, check the Eureka pipeline."
-      	exit 1
+        echo "[ERROR]: The container bridge app does not exists."
+	      echo "[ERROR]: Please, check the Eureka pipeline."
+	      exit 1
       else
-      	if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS})" ]; then
-      		echo "[ERROR]: The Eureka CUPS service has not been found."
-      		echo "[ERROR]: Please, check previous step in this pipeline."
-                  	exit 1
-            else
-                  cf bind-service ${BRIDGE_APP} ${CONFIG_SERVER_UPS}
-            fi
+        echo "[OK]: Bridge App exists"
+	      if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS})" ]; then
+		      echo "[ERROR]: The Eureka CUPS service has not been found."
+		      echo "[ERROR]: Please, check previous step in this pipeline."
+          exit 1
+        else
+          echo "[OK]: Config Server CUPS exists"
+          if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS} | grep ${BRIDGE_APP})" ]; then
+		        cf bind-service ${BRIDGE_APP} ${CONFIG_SERVER_UPS}
+		        echo "[OK]: Config Server and Bridge App bound"
+          else
+		        echo "[OK]: Config Server and Bridge App were already bound"
+	        fi
+        fi
       fi
-
       echo "[END]: Deploy Bridge App"

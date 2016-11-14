@@ -273,15 +273,16 @@ stages:
     script: |-
       #!/bin/bash
       echo "[BEGIN]: Deploy Bridge App"
-      if [ -z "$(cf apps | grep ${BRIDGE_APP})" ]; then
-      	touch empty_file.txt
-      	cf push ${BRIDGE_APP} -p . -i 1 -d mybluemix.net -k 1M -m 64M --no-hostname --no-manifest --no-route --no-start
-      fi
+
       if [ -z "$(cf services | grep ${SERVICE_DISCOVERY_UPS})" ]; then
-      	echo "[ERROR]: The Eureka CUPS service has not been found."
-      	echo "[ERROR]: Please, check previous step in this pipeline."
-           	exit 1
+	      echo "[ERROR]: The Eureka CUPS service has not been found."
+	      echo "[ERROR]: Please, check previous step in this pipeline."
+     	  exit 1
       else
-      	cf bind-service ${BRIDGE_APP} ${SERVICE_DISCOVERY_UPS}
+	      if [ -z "$(cf apps | grep ${BRIDGE_APP})" ]; then
+		      touch empty_file.txt
+		      cf push ${BRIDGE_APP} -p . -i 1 -d mybluemix.net -k 1M -m 64M --no-hostname --no-manifest --no-route --no-start
+		      cf bind-service ${BRIDGE_APP} ${SERVICE_DISCOVERY_UPS}
+	      fi
       fi
       echo "[END]: Deploy Bridge App"
