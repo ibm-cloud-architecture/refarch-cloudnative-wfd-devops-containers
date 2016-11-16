@@ -95,7 +95,7 @@ pipeline-wfd-eureka:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        #IGNORE_MAPPING_ROUTE: "true"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
@@ -128,7 +128,7 @@ pipeline-wfd-config:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        #IGNORE_MAPPING_ROUTE: "true"
        CONFIG_SERVER_UPS: "config-server-ic"
@@ -161,7 +161,7 @@ pipeline-wfd-appetizer:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container_bridge_app"
@@ -195,7 +195,7 @@ pipeline-wfd-entree:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container_bridge_app"
@@ -229,7 +229,7 @@ pipeline-wfd-dessert:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container_bridge_app"
@@ -263,7 +263,7 @@ pipeline-wfd-menu:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container_bridge_app"
@@ -297,12 +297,12 @@ pipeline-wfd-zuul:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
-       IGNORE_MAPPING_ROUTE: "yes"
+       IGNORE_MAPPING_ROUTE: null
        BRIDGE_APP: "container_bridge_app"
-       ROUTE_DOMAIN: null
-       ROUTE_HOSTNAME: null
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{deploy.parameters.route-hostname}}"
       execute: false
     services: ["git-wfd-zuul"]
   hidden: [form, description]
@@ -331,12 +331,12 @@ pipeline-wfd-menu-ui:
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false"
+       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
-       IGNORE_MAPPING_ROUTE: null
+       IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container_bridge_app"
-       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{deploy.parameters.route-hostname}}"
+       ROUTE_DOMAIN: null
+       ROUTE_HOSTNAME: null
       execute: false
     services: ["git-wfd-menu-ui"]
   hidden: [form, description]
