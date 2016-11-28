@@ -9,7 +9,7 @@
             "description": "Deploy to this Bluemix Region",
             "type": "string"
         },
-        "deploy-org": {
+        "deploy-organization": {
             "description": "Deploy to this Bluemix Organization",
             "type": "string"
         },
@@ -24,9 +24,17 @@
         "route-hostname": {
             "description": "Hostname for the app. Example: myappbluemix",
             "type": "string"
+        },
+        "branch": {
+            "description": "Branch to build from. Example: master",
+            "type": "string"
+        },
+        "unique-identifier": {
+            "description": "Unique identifier for your apps. Example: your surname",
+            "type": "string"
         }
     },
-    "required": ["deploy-region", "deploy-org", "deploy-space", "route-domain", "route-hostname"],
+    "required": ["deploy-region", "deploy-organization", "deploy-space", "route-domain", "route-hostname", "branch", "unique-identifier"],
     "form": [
         {
             "type": "validator",
@@ -43,6 +51,18 @@
             "readonly": false,
             "title": "Hostname for your app",
             "key": "route-hostname"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Branch to build from",
+            "key": "branch"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Unique Identifier",
+            "key": "unique-identifier"
         },
         {
             "type": "table",
@@ -75,7 +95,7 @@
                 },
                 {
                     "type": "select",
-                    "key": "deploy-org"
+                    "key": "deploy-organization"
                 },
                 {
                     "type": "select",

@@ -1,0 +1,525 @@
+---
+stages:
+- name: Build Java Projects
+  inputs:
+  - type: git
+    branch: ${BRANCH}
+    service: ${REPO}
+  triggers:
+  - type: commit
+  properties:
+  - name: DOCKER_DIR
+    value: ${DOCKER_DIR}
+    type: text
+  - name: BUILD_TARGET
+    value: ${BUILD_TARGET}
+    type: text
+  jobs:
+  - name: Build Java
+    type: builder
+    artifact_dir: ''
+    build_type: shell
+    script: |
+        #!/bin/bash
+        echo "Run gradle build..."
+        export JAVA_HOME=~/java8
+        export PATH=$JAVA_HOME/bin:$PATH
+        /bin/bash build-microservice.sh
+        cp ${BUILD_TARGET} ${DOCKER_DIR}/app.jar
+        ls -al $PWD
+        echo "Gradle build complete."
+
+- name: Build Docker Image
+  inputs:
+  - type: job
+    stage: Build Java Projects
+    job: Build Java
+  triggers:
+  - type: stage
+  properties:
+  - name: LABEL_PREFIX
+    value: ${LABEL_PREFIX}
+    type: text
+  - name: DOCKER_DIR
+    value: ${DOCKER_DIR}
+    type: text
+  - name: REGION
+    value: ${REGION}
+    type: text
+  - name: ORG
+    value: ${ORG}
+    type: text
+  - name: SPACE
+    value: ${SPACE}
+    type: text
+  - name: NAME
+    value: ${NAME}
+    type: text
+  jobs:
+  - name: Build container
+    type: builder
+    extension_id: ibm.devops.services.pipeline.container.builder
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    IMAGE_NAME: ${NAME}
+    USE_CACHED_LAYERS: 'true'
+    COMMAND: |-
+      #!/bin/bash
+        # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
+        log_and_echo "$LABEL" "Starting build script"
+        cd ${WORKSPACE}/${DOCKER_DIR}
+        # The IBM Container BM Containers plug-in (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.
+        # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
+        #####################
+        # Run unit tests    #
+        #####################
+        log_and_echo "$LABEL" "No unit tests cases have been checked in"
+        ######################################
+        # Build Container via Dockerfile     #
+        ######################################
+        # REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+        FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${LABEL_PREFIX}${APPLICATION_VERSION}
+        # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
+        if [ -f Dockerfile ]; then
+            log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
+            ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
+            # build image
+            BUILD_COMMAND=""
+            if [ "${USE_CACHED_LAYERS}" == "true" ]; then
+                BUILD_COMMAND="build --pull --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}/${DOCKER_DIR}"
+                ice_retry ${BUILD_COMMAND}
+                RESULT=$?
+            else
+                BUILD_COMMAND="build --no-cache --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}/${DOCKER_DIR}"
+                ice_retry ${BUILD_COMMAND}
+                RESULT=$?
+            fi
+            if [ $RESULT -ne 0 ]; then
+                log_and_echo "$ERROR" "Error building image"
+                ice_retry info
+                ice_retry images
+                ${EXT_DIR}/print_help.sh
+                ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)"
+                exit 1
+            else
+                log_and_echo "$SUCCESSFUL" "Container build of ${FULL_REPOSITORY_NAME} was successful"
+                ${EXT_DIR}/utilities/sendMessage.sh -l good -m "Container build of ${FULL_REPOSITORY_NAME} was successful"
+            fi
+        else
+            log_and_echo "$ERROR" "Dockerfile not found in project"
+            ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Failed to get Dockerfile. $(get_error_info)"
+            exit 1
+        fi
+
+        ######################################################################################
+        # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE    #
+        ######################################################################################
+        echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
+- name: Deploy Microservice
+  inputs:
+  - type: job
+    stage: Build Docker Image
+    job: Build container
+  triggers:
+  - type: stage
+  properties:
+  - name: REGION
+    value: ${REGION}
+    type: text
+  - name: ORG
+    value: ${ORG}
+    type: text
+  - name: SPACE
+    value: ${SPACE}
+    type: text
+  - name: NAME
+    value: ${NAME}
+    type: text
+  - name: PORT
+    value: ${PORT}
+    type: text
+  - name: MIN_INSTANCES
+    value: ${MIN_INSTANCES}
+    type: text
+  - name: MAX_INSTANCES
+    value: ${MAX_INSTANCES}
+    type: text
+  - name: DESIRED_INSTANCES
+    value: ${DESIRED_INSTANCES}
+    type: text
+  - name: CONCURRENT_VERSIONS
+    value: ${CONCURRENT_VERSIONS}
+    type: text
+  - name: AUTO_RECOVERY
+    value: 'false'
+    type: text
+  - name: CONTAINER_SIZE
+    value: ${CONTAINER_SIZE}
+    type: text
+  - name: IGNORE_MAPPING_ROUTE
+    value: ${IGNORE_MAPPING_ROUTE}
+    type: text
+  - name: ROUTE_DOMAIN
+    value: ${ROUTE_DOMAIN}
+    type: text
+  - name: ROUTE_HOSTNAME
+    value: ${ROUTE_HOSTNAME}
+    type: text
+  - name: TEST_RESULT_FOR_AD
+    value: ${TEST_RESULT_FOR_AD}
+    type: text
+  - name: GROUP_SIZE
+    value: ${GROUP_SIZE}
+    type: text
+  - name: DEBUG
+    value: ${DEBUG}
+    type: text
+  - name: GIT_HOME
+    value: ${GIT_HOME}
+    type: text
+  - name: SERVICE_DISCOVERY_UPS
+    value: ${SERVICE_DISCOVERY_UPS}
+    type: text
+  - name: UNIQUE_IDENTIFIER
+    value: ${UNIQUE_IDENTIFIER}
+    type: text
+  - name: BRIDGE_APP
+    value: ${BRIDGE_APP}
+    type: text
+  - name: BIND_TO
+    value: ${BRIDGE_APP}
+    type: text
+  - name: APP_NAME
+    value: ${NAME}
+    type: text
+  - name: CONFIG_SERVER_UPS
+    value: ${CONFIG_SERVER_UPS}
+    type: text
+  - name: CS_CONTAINER_GR_ID
+    value: ${CS_CONTAINER_GR_ID}
+    type: text
+  - name: CS_CONTAINER_GR_IP
+    value: ${CS_CONTAINER_GR_IP}
+    type: text
+  jobs:
+  - name: Deploy Container Group
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    DEPLOY_TYPE: simple
+    PORT: ${PORT}
+    CONTAINER_NAME: ${NAME}
+    COMMAND: |-
+      #!/bin/bash
+
+      # -------------- #
+      # Set debug mode #
+      # -------------- #
+      if [[ -n ${DEBUG} ]]; then set -x ; fi
+
+      echo -e "${label_color}# ------------------------------- #${no_color}"
+      echo -e "${label_color}# [BEGIN]: Deploy Container Group #${no_color}"
+      echo -e "${label_color}# ------------------------------- #${no_color}"
+
+      # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
+      echo -e "${label_color}Starting deployment script${no_color}"
+      # To view/fork this script goto: https://github.com/Osthanes/deployscripts
+      # git_retry will retry git calls to prevent pipeline failure on temporary github problems
+      # the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer
+      git_retry clone https://github.com/Osthanes/deployscripts.git deployscripts
+
+      # Deploy Container Group:
+      # Optional environment properties (can be set directly in this script, or defined as environment properties):
+      #      NAME              Value         Description
+      #   =============      =========     ==============
+      #   ROUTE_HOSTNAME      String       Specify the Hostname for the Cloud Foundry Route you wish to assign to this container group.  By default this is not set.
+      #   ROUTE_DOMAIN        String       Specify domain name for the Cloud Foundry Route you wish to assign to this container group.  By default this is not set.
+      #   BIND_TO             String       Specify a Bluemix application name that whose bound services you wish to make available to the container.  By default this is not set.
+      #   DESIRED_INSTANCES:  Number       Specify the number of instances in the group.  Default value is 1.
+      #   AUTO_RECOVERY:      Boolean      Set auto-recovery to true/false.  Default value is false.
+      #                                    Default is false.
+      #   CONTAINER_SIZE      String       Specify container size: pico (64), nano (128), micro (256), tiny (512), small (1024), medium (2048),
+      #                                                            large (4096), x-large (8192), 2x-large (16384).
+      #                                    Default is micro (256).
+      #   CONCURRENT_VERSIONS Number       Number of versions of this group to leave active.
+      #                                    Default is 1
+      # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
+      /bin/bash deployscripts/deploygroup.sh
+      RESULT=$?
+      # source the deploy property file
+      if [ -f "${DEPLOY_PROPERTY_FILE}" ]; then
+        source "$DEPLOY_PROPERTY_FILE"
+      fi
+      #########################
+      # Environment DETAILS   #
+      #########################
+      # The environment has been setup.
+      # The Cloud Foundry CLI (cf), IBM Container Service CLI (ice), Git client (git), IDS Inventory CLI (ids-inv) and Python 2.7.3 (python) have been installed.
+      # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
+      # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
+      if [ $RESULT -ne 0 ]; then
+        echo -e "${red}Executed failed or had warnings ${no_color}"
+        ${EXT_DIR}/print_help.sh
+        exit $RESULT
+      fi
+      echo -e "${green}Execution complete${no_label}"
+
+      export NAME="${CONTAINER_NAME}_${BUILD_NUMBER}"
+      export CS_CONTAINER_GR_ID=`cf ic group list | grep $NAME | sed 's/ .*$//g'`
+      export CS_CONTAINER_GR_IP=`cf ic group inspect $CS_CONTAINER_GR_ID | grep private_ip_address | sed 's/.*: "\(.*\)".*$/\1/g'`
+
+      echo "Value of NAME: ${NAME}"
+      echo "Config Server container group ID: ${CS_CONTAINER_GR_ID}"
+      echo "Config Server container group IP: ${CS_CONTAINER_GR_IP}"
+
+      echo -e "${label_color}# ----------------------------- #${no_color}"
+      echo -e "${label_color}# [END]: Deploy Container Group #${no_color}"
+      echo -e "${label_color}# ----------------------------- #${no_color}"
+  - name: Deploy CUPS
+    type: deployer
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+      application: ${NAME}
+    script: |-
+      #!/bin/bash
+
+      # ------ #
+      # Colors #
+      # ------ #
+      export green='\e[0;32m'
+      export red='\e[0;31m'
+      export label_color='\e[0;33m'
+      export no_color='\e[0m' # No Color
+
+      # -------------- #
+      # Set debug mode #
+      # -------------- #
+
+      if [[ -n ${DEBUG} ]]; then set -x ; fi
+
+      echo -e "${label_color}# -------------------- #${no_color}"
+      echo -e "${label_color}# [BEGIN]: Deploy CUPS #${no_color}"
+      echo -e "${label_color}# -------------------- #${no_color}"
+
+      echo "Begining Config Server CUPS deployment"
+
+      if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS})" ]; then
+        cf create-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://${CS_CONTAINER_GR_IP}:${PORT}/\"}"
+      else
+        cf update-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://${CS_CONTAINER_GR_IP}:${PORT}/\"}";
+      fi
+
+      echo -e "${label_color}# ------------------ #${no_color}"
+      echo -e "${label_color}# [END]: Deploy CUPS #${no_color}"
+      echo -e "${label_color}# ------------------ #${no_color}"
+  - name: Update Container Bridge App
+    type: deployer
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+      application: ${NAME}
+    script: |
+      #!/bin/bash
+
+      # ------ #
+      # Colors #
+      # ------ #
+      export green='\e[0;32m'
+      export red='\e[0;31m'
+      export label_color='\e[0;33m'
+      export no_color='\e[0m' # No Color
+
+      # -------------- #
+      # Set debug mode #
+      # -------------- #
+
+      if [[ -n ${DEBUG} ]]; then set -x ; fi
+
+      echo -e "${label_color}# -------------------------- #${no_color}"
+      echo -e "${label_color}# [BEGIN]: Deploy Bridge App #${no_color}"
+      echo -e "${label_color}# -------------------------- #${no_color}"
+
+      if [ -z "$(cf apps | grep ${BRIDGE_APP})" ]; then
+        echo "[ERROR]: The container bridge app does not exists."
+        echo "[ERROR]: Please, check the Eureka pipeline."
+        exit 1
+      else
+        echo "[OK]: Bridge App exists"
+        if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS})" ]; then
+          echo "[ERROR]: The Config Server CUPS service has not been found."
+          echo "[ERROR]: Please, check previous step in this pipeline."
+          exit 1
+        else
+          echo "[OK]: Config Server CUPS exists"
+          if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS} | grep ${BRIDGE_APP})" ]; then
+            cf bind-service ${BRIDGE_APP} ${CONFIG_SERVER_UPS}
+            echo "[OK]: Config Server and Bridge App bound"
+          else
+            echo "[OK]: Config Server and Bridge App were already bound"
+          fi
+        fi
+      fi
+
+      echo -e "${label_color}# ------------------------ #${no_color}"
+      echo -e "${label_color}# [END]: Deploy Bridge App #${no_color}"
+      echo -e "${label_color}# ------------------------ #${no_color}"
+  - name: Update Microservices
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    PORT: ${PORT}
+    CONTAINER_NAME: ${NAME}
+    DEPLOY_TYPE: simple
+    COMMAND: |-
+      #!/bin/bash
+
+      # -------------- #
+      # Set debug mode #
+      # -------------- #
+
+      if [[ -n ${DEBUG} ]]; then set -x ; fi
+
+      echo -e "${label_color}# ------------------------------- #${no_color}"
+      echo -e "${label_color}# [BEGIN]: Updating microservices #${no_color}"
+      echo -e "${label_color}# ------------------------------- #${no_color}"
+
+      # ------------------ Python spcripts --------------------- #
+      export PYTHONPATH=$EXT_DIR/utilities/:$PYTHONPATH
+
+      export BEARER_TOKEN=`python - <<CODE
+      import python_utils
+      BEARER_TOKEN, SPACE_GUID = python_utils.load_cf_auth_info()
+      print(str(BEARER_TOKEN))
+      CODE`
+      export SPACE_ID=`python - <<CODE
+      import python_utils
+      BEARER_TOKEN, SPACE_GUID = python_utils.load_cf_auth_info()
+      print(str(SPACE_GUID))
+      CODE`
+      # --------------------------------------------------------- #
+
+      # Location of the new Eureka Server
+      NEW_CS_LOCATION="http://${CS_CONTAINER_GR_IP}:${PORT}/"
+
+      NUM_MICROSERVICES=$(cf ic group list | grep ${UNIQUE_IDENTIFIER} | grep -v eureka | grep -v ${APP_NAME} | wc -l)
+      if [ $NUM_MICROSERVICES -ne 0 ]; then
+        # For each microservice, we need to update their VCAP_SERVICES so that they point to the new Eureka Server
+        MICROSERVICES=`cf ic group list | grep ${UNIQUE_IDENTIFIER} | grep -v eureka | grep -v ${APP_NAME} | sed 's/    .*$//g' | sed 's/^.*  //g'`
+
+        for MICROSERVICE in `echo ${MICROSERVICES}`
+        do
+          echo "[INFO]: Updating Config Server url for microservice: $MICROSERVICE"
+
+          MICROSERVICE_CONTAINER_GR_ID=`cf ic group list | grep $MICROSERVICE | sed 's/ .*$//g'`
+
+          OLD_VCAP_SERVICES=`cf ic group inspect $MICROSERVICE_CONTAINER_GR_ID | grep 'VCAP_SERVICES=' | sed 's/^.*VCAP_SERVICES=\(.*\)",.*$/\1/g'`
+
+          NEW_VCAP_SERVICES=`echo $OLD_VCAP_SERVICES | sed "s@\(^.*eureka.*\)http://.*:${PORT}@\1http://${CS_CONTAINER_GR_IP}:${PORT}@g"`
+          echo "[INFO]: $MICROSERVICE new VCAP Services: $NEW_VCAP_SERVICES"
+
+          RESULT=`curl -s -o /dev/null -w "%{http_code}" -X PATCH \
+                      --header "Content-Type: application/json" \
+                      --header "Accept: application/json" \
+                      --header "X-Auth-Token: ${BEARER_TOKEN}" \
+                      --header "X-Auth-Project-Id: ${SPACE_ID}" \
+                      -d "{\"Environment\":[\"VCAP_SERVICES=${NEW_VCAP_SERVICES}\"],\"NumberInstances\": {}}" \
+                      "https://containers-api.ng.bluemix.net/v3/containers/groups/${MICROSERVICE}"`
+
+          if [ $RESULT -ge 400 ]; then
+            echo -e "${red}Result of curl: $RESULT ${no_color}"
+          else
+            echo -e "${green}Result of curl: $RESULT ${no_color}"
+          fi
+        done
+      else
+        echo -e "${green}[INFO]: There is no microservice to be updated ${no_color}"
+      fi
+
+      echo -e "${label_color}# ----------------------------- #${no_color}"
+      echo -e "${label_color}# [END]: Updating microservices #${no_color}"
+      echo -e "${label_color}# ----------------------------- #${no_color}"
+  - name: Active Deploy - Begin
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.devops.ad_start
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    DEPLOYMENT_METHOD: Red Black
+    RAMPDOWN_DURATION: ${RAMPDOWN_DURATION}
+    RAMPUP_DURATION: ${RAMPUP_DURATION}
+    COMMAND: |-
+      #!/bin/bash
+      #
+      # The following code uses the Active Deploy service to update your new application with zero downtime.
+      # The code used is available at https://github.com/Osthanes/update_service
+      # and https://github.com/Osthanes/activedeploy_common.
+      #
+      # For details about how to set up the Active Deploy extension for the Delivery Pipeline, see
+      # https://console.ng.bluemix.net/docs/services/ActiveDeploy/updatingapps.html#adpipeline.
+      #
+      # Feel free to fork the code. After creating your fork, define the environment variable GIT_HOME to use the forked repositories with the
+      # format https://github.com/${GIT_HOME}/update_service and https://github.com/${GIT_HOME}/activedeploy_common.
+      #
+      # Make sure the following variables are defined as environment properties with no values:
+      # NAME: The name of your new application. This variable has to be exported in the first deploy job.
+      # TEST_RESULT_FOR_AD: Passes the results of the test phase to the Active Deploy - Complete job. Set this variable in the test job.
+      #
+      # The following variables may be defined as environment properties:
+      # GROUP_SIZE: The number of instances that are created during initial deployment. The default value is 1.
+      # CONCURRENT_VERSIONS: The number of application versions to keep at the end of deployment. The default value is 2.
+      # AD_INSTANCE_NAME: The name for Active Deploy Instance, if it does not yet exist. The default value is activedeploy-for-pipeline.
+
+      source ${EXT_DIR}/git_util.sh
+      git_retry clone https://github.com/${GIT_HOME}/update_service.git activedeploy
+      activedeploy/activedeploy_step_1.sh
+  - name: Test
+    type: tester
+    fail_stage: false
+    script: |-
+      #!/bin/bash
+      # invoke tests here
+
+      # -------------- #
+      # Set debug mode #
+      # -------------- #
+      if [[ -n ${DEBUG} ]]; then set -x ; fi
+
+      export TEST_RESULT_FOR_AD=0
+
+      echo "No test carried out"
+  - name: Active Deploy - Complete
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.devops.ad_finish
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    COMMAND: |-
+      #!/bin/bash
+      #
+      # The following code uses the Active Deploy service to update your new application with zero downtime.
+      # The code used is available at https://github.com/Osthanes/update_service
+      # and https://github.com/Osthanes/activedeploy_common.
+      #
+      # For details about how to set up the Active Deploy extension for the Delivery Pipeline, see
+      # https://console.ng.bluemix.net/docs/services/ActiveDeploy/updatingapps.html#adpipeline.
+      #
+      # Feel free to fork the code. After creating your fork, define the environment variable GIT_HOME to use the forked repositories with the
+      # format https://github.com/${GIT_HOME}/update_service and https://github.com/${GIT_HOME}/activedeploy_common.
+      #
+
+      source ${EXT_DIR}/git_util.sh
+      git_retry clone https://github.com/${GIT_HOME}/update_service.git activedeploy
+      activedeploy/activedeploy_step_2.sh

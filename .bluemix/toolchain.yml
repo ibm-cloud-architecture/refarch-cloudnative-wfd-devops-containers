@@ -1,7 +1,19 @@
 ---
 name: "What is for dinner Toolchain"
-description: "Microservices sample application"
+description: "Microservices sample application. \n\
+In this window, you will be asked to specify the following properties for your toolchain: \n\n\
+1. Specify a name for your toolchain that is unique among all toolchains on your Bluemix namespace DevOps section. \n\
+2. Click on the \"GitHub\" icon. This opens the GitHub settings. Please, give your desired name to each of the repos that will be cloned. \n\
+3. Click on the \"Delivery Pipeline\" icon. This opens the delivery pipeline settings: \n\n\
+\t - Specify the Bluemix domain for your apps' routes (by default: mybluemix.net). \n\
+\t - Specify the build branch you would like your delivery pipelines to build the code from (by default: master). \n\
+\t - Specify a unique identifier which must make your apps' names __unique in Bluemix public__ (by default: toolchain's creation timestamp). \n\
+4. Click the Create button to complete the toolchain creation."
 version: 0.1
+image: data:image/svg+xml;base64,$file(arch.svg,base64)
+icon: data:image/svg+xml;base64,$file(icon.svg,base64)
+toolchain:
+  name: "whats_for_dinner_IC_toolchain"
 required:
  - deploy
 
@@ -9,7 +21,7 @@ required:
 git-wfd-eureka:
   service_id: githubpublic
   parameters:
-    repo_name: "eureka-clone"
+    repo_name: "eureka-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-eureka"
     type: clone
     has_issues: false
@@ -17,7 +29,7 @@ git-wfd-eureka:
 git-wfd-config-server:
   service_id: githubpublic
   parameters:
-    repo_name: "config-clone"
+    repo_name: "config-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-spring-config"
     type: clone
     has_issues: false
@@ -25,7 +37,7 @@ git-wfd-config-server:
 git-wfd-zuul:
   service_id: githubpublic
   parameters:
-    repo_name: "zuul-clone"
+    repo_name: "zuul-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-zuul"
     type: clone
     has_issues: false
@@ -33,7 +45,7 @@ git-wfd-zuul:
 git-wfd-menu:
   service_id: githubpublic
   parameters:
-    repo_name: "menu-clone"
+    repo_name: "menu-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-menu"
     type: clone
     has_issues: false
@@ -41,7 +53,7 @@ git-wfd-menu:
 git-wfd-appetizer:
   service_id: githubpublic
   parameters:
-    repo_name: "appetizer-clone"
+    repo_name: "appetizer-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-appetizer"
     type: clone
     has_issues: false
@@ -49,7 +61,7 @@ git-wfd-appetizer:
 git-wfd-entree:
   service_id: githubpublic
   parameters:
-    repo_name: "entree-clone"
+    repo_name: "entree-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-entree"
     type: clone
     has_issues: false
@@ -57,7 +69,7 @@ git-wfd-entree:
 git-wfd-dessert:
   service_id: githubpublic
   parameters:
-    repo_name: "dessert-clone"
+    repo_name: "dessert-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-dessert"
     type: clone
     has_issues: false
@@ -65,7 +77,7 @@ git-wfd-dessert:
 git-wfd-menu-ui:
   service_id: githubpublic
   parameters:
-    repo_name: "menu-ui-clone"
+    repo_name: "menu-ui-ic-clone"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-ui"
     type: clone
     has_issues: false
@@ -74,32 +86,43 @@ git-wfd-menu-ui:
 pipeline-wfd-eureka:
   service_id: pipeline
   parameters:
-    name: "wfd-eureka"
+    name: "wfd-eureka-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd_eureka_pipeline.yml)
+      content: $file(wfd-eureka-ic-pipeline.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/eureka-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-eureka"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-eureka.parameters.name}}"
+       NAME: "{{pipeline-wfd-eureka.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
-       PORT: "8761"
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
        CONCURRENT_VERSIONS: "1"
-       #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
-       #IGNORE_MAPPING_ROUTE: "true"
+       IGNORE_MAPPING_ROUTE: "yes"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
-       BRIDGE_APP: "container_bridge_app"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
+       PORT: "8761"
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-eureka.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
+       UNIQUE_IDENTIFIER: "{{deploy.parameters.unique-identifier}}"
+       EUREKA_CONTAINER_GR_IP: null
+       EUREKA_CONTAINER_GR_ID: null
       execute: false
     services: ["git-wfd-eureka"]
   hidden: [form, description]
@@ -107,20 +130,21 @@ pipeline-wfd-eureka:
 pipeline-wfd-config:
   service_id: pipeline
   parameters:
-    name: "wfd-config"
+    name: "wfd-config-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd_config_server_pipeline.yml)
+      content: $file(wfd-config-server-ic-pipeline.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/config-server-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-config-server"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-config.parameters.name}}"
+       NAME: "{{pipeline-wfd-config.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8888"
@@ -130,9 +154,21 @@ pipeline-wfd-config:
        CONCURRENT_VERSIONS: "1"
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
-       #IGNORE_MAPPING_ROUTE: "true"
+       IGNORE_MAPPING_ROUTE: "yes"
        CONFIG_SERVER_UPS: "config-server-ic"
-       BRIDGE_APP: "container_bridge_app"
+       SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-config.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
+       UNIQUE_IDENTIFIER: "{{deploy.parameters.unique-identifier}}"
+       CS_CONTAINER_GR_ID: null
+       CS_CONTAINER_GR_IP: null
       execute: false
     services: ["git-wfd-config-server"]
   hidden: [form, description]
@@ -140,20 +176,21 @@ pipeline-wfd-config:
 pipeline-wfd-appetizer:
   service_id: pipeline
   parameters:
-    name: "wfd-appetizer"
+    name: "wfd-appetizer-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-template.yml)
+      content: $file(wfd-ic-pipeline-template.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/wfd-appetizer-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-appetizer"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-appetizer.parameters.name}}"
+       NAME: "{{pipeline-wfd-appetizer.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8082"
@@ -164,9 +201,15 @@ pipeline-wfd-appetizer:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container_bridge_app"
-       ROUTE_DOMAIN: null
-       ROUTE_HOSTNAME: null
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-appetizer.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
       execute: false
     services: ["git-wfd-appetizer"]
   hidden: [form, description]
@@ -174,20 +217,21 @@ pipeline-wfd-appetizer:
 pipeline-wfd-entree:
   service_id: pipeline
   parameters:
-    name: "wfd-entree"
+    name: "wfd-entree-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-template.yml)
+      content: $file(wfd-ic-pipeline-template.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/wfd-entree-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-entree"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-entree.parameters.name}}"
+       NAME: "{{pipeline-wfd-entree.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8081"
@@ -198,9 +242,15 @@ pipeline-wfd-entree:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container_bridge_app"
-       ROUTE_DOMAIN: null
-       ROUTE_HOSTNAME: null
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-entree.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
       execute: false
     services: ["git-wfd-entree"]
   hidden: [form, description]
@@ -208,20 +258,21 @@ pipeline-wfd-entree:
 pipeline-wfd-dessert:
   service_id: pipeline
   parameters:
-    name: "wfd-dessert"
+    name: "wfd-dessert-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-template.yml)
+      content: $file(wfd-ic-pipeline-template.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/wfd-dessert-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-dessert"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-dessert.parameters.name}}"
+       NAME: "{{pipeline-wfd-dessert.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8083"
@@ -232,9 +283,15 @@ pipeline-wfd-dessert:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container_bridge_app"
-       ROUTE_DOMAIN: null
-       ROUTE_HOSTNAME: null
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-dessert.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
       execute: false
     services: ["git-wfd-dessert"]
   hidden: [form, description]
@@ -242,20 +299,21 @@ pipeline-wfd-dessert:
 pipeline-wfd-menu:
   service_id: pipeline
   parameters:
-    name: "wfd-menu"
+    name: "wfd-menu-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-template.yml)
+      content: $file(wfd-ic-pipeline-template.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/wfd-menu-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-menu"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-menu.parameters.name}}"
+       NAME: "{{pipeline-wfd-menu.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8180"
@@ -266,9 +324,15 @@ pipeline-wfd-menu:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container_bridge_app"
-       ROUTE_DOMAIN: null
-       ROUTE_HOSTNAME: null
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-menu.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
       execute: false
     services: ["git-wfd-menu"]
   hidden: [form, description]
@@ -276,20 +340,21 @@ pipeline-wfd-menu:
 pipeline-wfd-zuul:
   service_id: pipeline
   parameters:
-    name: "wfd-zuul"
+    name: "wfd-zuul-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-template.yml)
+      content: $file(wfd-ic-pipeline-template.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/zuul-proxy-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-zuul"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-zuul.parameters.name}}"
+       NAME: "{{pipeline-wfd-zuul.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8080"
@@ -299,10 +364,16 @@ pipeline-wfd-zuul:
        CONCURRENT_VERSIONS: "1"
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
-       IGNORE_MAPPING_ROUTE: null
-       BRIDGE_APP: "container_bridge_app"
+       IGNORE_MAPPING_ROUTE: "yes"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{deploy.parameters.route-hostname}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
       execute: false
     services: ["git-wfd-zuul"]
   hidden: [form, description]
@@ -310,20 +381,21 @@ pipeline-wfd-zuul:
 pipeline-wfd-menu-ui:
   service_id: pipeline
   parameters:
-    name: "wfd-menu-ui"
+    name: "wfd-menu-ui-ic-ad"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-template.yml)
+      content: $file(wfd-ic-pipeline-template.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
        BUILD_TARGET: "build/libs/wfd-ui-0.0.1-SNAPSHOT.jar"
        REPO: "git-wfd-menu-ui"
+       BRANCH: "{{deploy.parameters.branch}}"
        # Build container stage env variables
        REGION: "{{deploy.parameters.deploy-region}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
+       ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-menu-ui.parameters.name}}"
+       NAME: "{{pipeline-wfd-menu-ui.parameters.name}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8181"
@@ -334,9 +406,15 @@ pipeline-wfd-menu-ui:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container_bridge_app"
-       ROUTE_DOMAIN: null
-       ROUTE_HOSTNAME: null
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
+       ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-menu-ui.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       TEST_RESULT_FOR_AD: "1"
+       GROUP_SIZE: "1"
+       DEBUG: null
+       GIT_HOME: "{{deploy.parameters.git-home}}"
+       RAMPDOWN_DURATION: "1s"
+       RAMPUP_DURATION: "1s"
       execute: false
     services: ["git-wfd-menu-ui"]
   hidden: [form, description]
@@ -347,8 +425,10 @@ deploy:
   service-category: pipeline
   parameters:
     deploy-region: "{{region}}"
-    deploy-org: "{{organization}}"
+    deploy-organization: "{{organization}}"
     deploy-space: "{{space}}"
     route-domain: "mybluemix.net"
-    route-hostname: "{{route-hostname}}"
-    context-path: "micro"
+    route-hostname: "mymenu"
+    branch: "master"
+    unique-identifier: "{{timestamp}}"
+    git-home: "Osthanes"
