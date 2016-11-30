@@ -47,7 +47,7 @@ All microservices depend on Eureka for service registration and discovery. This 
 
 Because of the need of the User Provided Services and the container bridge app, the Eureka and Config Server __Deploy Microservice__ delivery pipeline stages contain extra jobs and look like the following:
 
-<img src="static/imgs/eureka.png" hspace="200">
+<img src="static/imgs/eureka.png?raw=true" hspace="250">
 
 ### Eureka & Active Deploy
 
