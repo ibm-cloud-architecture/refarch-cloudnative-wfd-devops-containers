@@ -38,7 +38,7 @@
             "type": "string"
         }
     },
-    "required": ["deploy-region", "deploy-organization", "deploy-space", "menu-endpoint", "menu-apis-endpoint", "route-hostname", "branch", "unique-identifier"],
+    "required": ["deploy-region", "deploy-organization", "deploy-space", "menu-endpoint", "menu-apis-endpoint", "route-domain", "branch", "unique-identifier"],
     "form": [
         {
             "type": "validator",
