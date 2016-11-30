@@ -367,7 +367,7 @@ pipeline-wfd-zuul:
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{deploy.parameters.route-hostname}}"
+       ROUTE_HOSTNAME: "{{deploy.parameters.menu-apis-endpoint}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -408,7 +408,7 @@ pipeline-wfd-menu-ui:
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-menu-ui.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       ROUTE_HOSTNAME: "{{deploy.parameters.menu-endpoint}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -428,7 +428,8 @@ deploy:
     deploy-organization: "{{organization}}"
     deploy-space: "{{space}}"
     route-domain: "mybluemix.net"
-    route-hostname: "mymenu"
+    menu-endpoint: "mymenu"
+    menu-apis-endpoint: "menu-apis"
     branch: "master"
     unique-identifier: "{{timestamp}}"
     git-home: "Osthanes"
