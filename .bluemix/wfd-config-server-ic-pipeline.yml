@@ -316,7 +316,15 @@ stages:
 
       echo "Begining Config Server CUPS deployment"
 
-      if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS})" ]; then
+      for i in $(cf services | grep ${CONFIG_SERVER_UPS} | sed 's/ .*$//g')
+      do
+        if [ "${CONFIG_SERVER_UPS}" = "${i}" ]; then
+          CS_FOUND="yes"
+          break
+        fi
+      done
+      
+      if [ -z "${CS_FOUND}" ]; then
         cf create-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://${CS_CONTAINER_GR_IP}:${PORT}/\"}"
       else
         cf update-user-provided-service ${CONFIG_SERVER_UPS} -p "{\"uri\": \"http://${CS_CONTAINER_GR_IP}:${PORT}/\"}";
@@ -353,24 +361,34 @@ stages:
       echo -e "${label_color}# [BEGIN]: Deploy Bridge App #${no_color}"
       echo -e "${label_color}# -------------------------- #${no_color}"
 
-      if [ -z "$(cf apps | grep ${BRIDGE_APP})" ]; then
+      for i in $(cf apps | grep ${BRIDGE_APP} | sed 's/ .*$//g')
+      do
+        if [ "${BRIDGE_APP}" = "${i}" ]; then
+          BA_FOUND="yes"
+          break
+        fi
+      done
+      for i in $(cf services | grep ${CONFIG_SERVER_UPS} | sed 's/ .*$//g')
+      do
+        if [ "${CONFIG_SERVER_UPS}" = "${i}" ]; then
+          CS_FOUND="yes"
+          break
+        fi
+      done
+
+      if [ -z "${BA_FOUND}" ]; then
         echo "[ERROR]: The container bridge app does not exists."
         echo "[ERROR]: Please, check the Eureka pipeline."
         exit 1
       else
         echo "[OK]: Bridge App exists"
-        if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS})" ]; then
+        if [ -z "${CS_FOUND}" ]; then
           echo "[ERROR]: The Config Server CUPS service has not been found."
           echo "[ERROR]: Please, check previous step in this pipeline."
           exit 1
         else
           echo "[OK]: Config Server CUPS exists"
-          if [ -z "$(cf services | grep ${CONFIG_SERVER_UPS} | grep ${BRIDGE_APP})" ]; then
-            cf bind-service ${BRIDGE_APP} ${CONFIG_SERVER_UPS}
-            echo "[OK]: Config Server and Bridge App bound"
-          else
-            echo "[OK]: Config Server and Bridge App were already bound"
-          fi
+          cf bind-service ${BRIDGE_APP} ${CONFIG_SERVER_UPS}
         fi
       fi
 
