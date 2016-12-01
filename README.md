@@ -60,3 +60,7 @@ By doing this, we have observed it to take anywhere from 120-180 seconds until t
 ### Delivery pipelines & public routes
 
 There is a limitation on this zero downtime microservices architecture approach introduced by the Bluemix Delivery Pipeline Service. The Bluemix Delivery Pipeline Service will map a public route to the microservice container group on its initial deployment and will need such route to be kept mapped to the microservice container group in order to red/black deploy a new version of the microservice.
+
+### Multiple What's For Dinner apps
+
+There is a limitation on the number of What's For Dinner apps you can deploy onto the same space to one. The reason for this is that the UPS created will be called likewise so then the delivery pipelines from the different What's For Dinner apps will overwrite each other's values. Hence there is a limitation of one What's For Dinner app per Bluemix Space.
