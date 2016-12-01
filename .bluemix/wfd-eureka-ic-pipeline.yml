@@ -52,6 +52,9 @@ stages:
   - name: SPACE
     value: ${SPACE}
     type: text
+  - name: PATTERN
+    value: ${PATTERN}
+    type: text
   - name: NAME
     value: ${NAME}
     type: text
@@ -133,6 +136,9 @@ stages:
     type: text
   - name: SPACE
     value: ${SPACE}
+    type: text
+  - name: PATTERN
+    value: ${PATTERN}
     type: text
   - name: NAME
     value: ${NAME}

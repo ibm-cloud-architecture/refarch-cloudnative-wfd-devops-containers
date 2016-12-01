@@ -1,13 +1,14 @@
 ---
 name: "What is for dinner Toolchain"
-description: "Microservices sample application. \n\
+description: "Microservices Cloud Foundry reference application Toolchain. \n\
 In this window, you will be asked to specify the following properties for your toolchain: \n\n\
-1. Specify a name for your toolchain that is unique among all toolchains on your Bluemix namespace DevOps section. \n\
-2. Click on the \"GitHub\" icon. This opens the GitHub settings. Please, give your desired name to each of the repos that will be cloned. \n\
-3. Click on the \"Delivery Pipeline\" icon. This opens the delivery pipeline settings: \n\n\
-\t - Specify the Bluemix domain for your apps' routes (by default: mybluemix.net). \n\
-\t - Specify the build branch you would like your delivery pipelines to build the code from (by default: master). \n\
-\t - Specify a unique identifier which must make your apps' names __unique in Bluemix public__ (by default: toolchain's creation timestamp). \n\
+1. Specify a name for your toolchain that is __unique__ among all toolchains on your Bluemix namespace DevOps section. \n\
+2. Click on the __GitHub__ icon. This opens the GitHub settings. Please, give your desired name to each of the repos that will be cloned. \n\
+3. Click on the __Delivery Pipeline__ icon. This opens the delivery pipeline settings: \n\n\
+\t - Specify the __Bluemix domain__ where your app will be hosted *(by default: mybluemix.net)*. \n\
+\t - Specify the __build branch__ you would like your delivery pipelines to build the code from *(by default: master)*. \n\
+\t - Specify your __app and APIs endpoints__ which must be __unique__ within Bluemix public *(by default: \"mymenu\" and \"menu-apis\" respectively)*. \n\
+\t - Specify a __unique identifier__ which will be used to make the What's For Dinner microservices and their routing __unique within Bluemix public__ *(by default: toolchain's creation timestamp)*. \n\
 4. Click the Create button to complete the toolchain creation."
 version: 0.1
 image: data:image/svg+xml;base64,$file(arch.svg,base64)
@@ -86,7 +87,7 @@ git-wfd-menu-ui:
 pipeline-wfd-eureka:
   service_id: pipeline
   parameters:
-    name: "wfd-eureka-ic-ad"
+    name: "1. Eureka IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-eureka-ic-pipeline.yml)
@@ -100,7 +101,8 @@ pipeline-wfd-eureka:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-eureka.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-eureka-ic-ad"
+       NAME: "{{pipeline-wfd-eureka.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        MIN_INSTANCES: "1"
@@ -113,7 +115,7 @@ pipeline-wfd-eureka:
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        PORT: "8761"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-eureka.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-eureka.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -130,7 +132,7 @@ pipeline-wfd-eureka:
 pipeline-wfd-config:
   service_id: pipeline
   parameters:
-    name: "wfd-config-ic-ad"
+    name: "2. Config Server IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-config-server-ic-pipeline.yml)
@@ -144,7 +146,8 @@ pipeline-wfd-config:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-config.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-config-ic-ad"
+       NAME: "{{pipeline-wfd-config.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8888"
@@ -159,7 +162,7 @@ pipeline-wfd-config:
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-config.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-config.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -176,7 +179,7 @@ pipeline-wfd-config:
 pipeline-wfd-appetizer:
   service_id: pipeline
   parameters:
-    name: "wfd-appetizer-ic-ad"
+    name: "3. Appetizer IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-ic-pipeline-template.yml)
@@ -190,7 +193,8 @@ pipeline-wfd-appetizer:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-appetizer.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-appetizer-ic-ad"
+       NAME: "{{pipeline-wfd-appetizer.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8082"
@@ -203,7 +207,7 @@ pipeline-wfd-appetizer:
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-appetizer.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-appetizer.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -217,7 +221,7 @@ pipeline-wfd-appetizer:
 pipeline-wfd-entree:
   service_id: pipeline
   parameters:
-    name: "wfd-entree-ic-ad"
+    name: "4. Entree IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-ic-pipeline-template.yml)
@@ -231,7 +235,8 @@ pipeline-wfd-entree:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-entree.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-entree-ic-ad"
+       NAME: "{{pipeline-wfd-entree.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8081"
@@ -244,7 +249,7 @@ pipeline-wfd-entree:
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-entree.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-entree.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -258,7 +263,7 @@ pipeline-wfd-entree:
 pipeline-wfd-dessert:
   service_id: pipeline
   parameters:
-    name: "wfd-dessert-ic-ad"
+    name: "5. Dessert IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-ic-pipeline-template.yml)
@@ -272,7 +277,8 @@ pipeline-wfd-dessert:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-dessert.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-dessert-ic-ad"
+       NAME: "{{pipeline-wfd-dessert.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8083"
@@ -285,7 +291,7 @@ pipeline-wfd-dessert:
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-dessert.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-dessert.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -299,7 +305,7 @@ pipeline-wfd-dessert:
 pipeline-wfd-menu:
   service_id: pipeline
   parameters:
-    name: "wfd-menu-ic-ad"
+    name: "6. Menu IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-ic-pipeline-template.yml)
@@ -313,7 +319,8 @@ pipeline-wfd-menu:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-menu.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-menu-ic-ad"
+       NAME: "{{pipeline-wfd-menu.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8180"
@@ -326,7 +333,7 @@ pipeline-wfd-menu:
        IGNORE_MAPPING_ROUTE: "yes"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-menu.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-menu.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -340,7 +347,7 @@ pipeline-wfd-menu:
 pipeline-wfd-zuul:
   service_id: pipeline
   parameters:
-    name: "wfd-zuul-ic-ad"
+    name: "8. Zuul Proxy IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-ic-pipeline-template.yml)
@@ -354,7 +361,8 @@ pipeline-wfd-zuul:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-zuul.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-zuul-ic-ad"
+       NAME: "{{pipeline-wfd-zuul.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8080"
@@ -381,7 +389,7 @@ pipeline-wfd-zuul:
 pipeline-wfd-menu-ui:
   service_id: pipeline
   parameters:
-    name: "wfd-menu-ui-ic-ad"
+    name: "7. Menu UI IC"
     ui-pipeline: true
     configuration:
       content: $file(wfd-ic-pipeline-template.yml)
@@ -395,7 +403,8 @@ pipeline-wfd-menu-ui:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-wfd-menu-ui.parameters.name}}-{{deploy.parameters.unique-identifier}}"
+       PATTERN: "wfd-menu-ui-ic-ad"
+       NAME: "{{pipeline-wfd-menu-ui.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8181"
