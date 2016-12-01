@@ -158,7 +158,7 @@ pipeline-wfd-config:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       CONFIG_SERVER_UPS: "config-server-ic"
+       CONFIG_SERVER_UPS: "config-server"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
        BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
