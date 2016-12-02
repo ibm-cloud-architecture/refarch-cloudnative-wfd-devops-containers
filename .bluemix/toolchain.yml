@@ -114,7 +114,7 @@ pipeline-wfd-eureka:
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}" 
        PORT: "8761"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{pipeline-wfd-eureka.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
@@ -162,7 +162,7 @@ pipeline-wfd-config:
        IGNORE_MAPPING_ROUTE: "yes"
        CONFIG_SERVER_UPS: "config-server"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "{{pipeline-wfd-eureka.parameters.configuration.env.BRIDGE_APP}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{pipeline-wfd-config.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
        TEST_RESULT_FOR_AD: "1"
@@ -207,7 +207,7 @@ pipeline-wfd-appetizer:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "{{pipeline-wfd-eureka.parameters.configuration.env.BRIDGE_APP}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{pipeline-wfd-appetizer.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
        TEST_RESULT_FOR_AD: "1"
@@ -249,7 +249,7 @@ pipeline-wfd-entree:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "{{pipeline-wfd-eureka.parameters.configuration.env.BRIDGE_APP}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{pipeline-wfd-entree.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
        TEST_RESULT_FOR_AD: "1"
@@ -291,7 +291,7 @@ pipeline-wfd-dessert:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "{{pipeline-wfd-eureka.parameters.configuration.env.BRIDGE_APP}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{pipeline-wfd-dessert.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
        TEST_RESULT_FOR_AD: "1"
@@ -333,7 +333,7 @@ pipeline-wfd-menu:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "{{pipeline-wfd-eureka.parameters.configuration.env.BRIDGE_APP}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{pipeline-wfd-menu.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
        TEST_RESULT_FOR_AD: "1"
@@ -375,7 +375,7 @@ pipeline-wfd-zuul:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "{{pipeline-wfd-eureka.parameters.configuration.env.BRIDGE_APP}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{deploy.parameters.menu-apis-endpoint}}"
        TEST_RESULT_FOR_AD: "1"
@@ -417,7 +417,7 @@ pipeline-wfd-menu-ui:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "{{pipeline-wfd-eureka.parameters.configuration.env.BRIDGE_APP}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{deploy.parameters.menu-endpoint}}"
        TEST_RESULT_FOR_AD: "1"
