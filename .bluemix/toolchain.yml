@@ -102,7 +102,7 @@ pipeline-wfd-eureka:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-eureka-ic-ad"
-       NAME: "{{pipeline-wfd-eureka.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-eureka.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        MIN_INSTANCES: "1"
@@ -112,10 +112,10 @@ pipeline-wfd-eureka:
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        PORT: "8761"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-eureka.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-eureka.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -147,7 +147,7 @@ pipeline-wfd-config:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-config-ic-ad"
-       NAME: "{{pipeline-wfd-config.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-config.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8888"
@@ -160,16 +160,16 @@ pipeline-wfd-config:
        IGNORE_MAPPING_ROUTE: "yes"
        CONFIG_SERVER_UPS: "config-server"
        SERVICE_DISCOVERY_UPS: "eureka-service-discovery"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-config.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-config.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
        GIT_HOME: "{{deploy.parameters.git-home}}"
        RAMPDOWN_DURATION: "1s"
        RAMPUP_DURATION: "1s"
-       UNIQUE_IDENTIFIER: "{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       UNIQUE_IDENTIFIER: "{{deploy.parameters.unique-identifier}}"
        CS_CONTAINER_GR_ID: null
        CS_CONTAINER_GR_IP: null
       execute: false
@@ -194,7 +194,7 @@ pipeline-wfd-appetizer:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-appetizer-ic-ad"
-       NAME: "{{pipeline-wfd-appetizer.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-appetizer.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8082"
@@ -205,9 +205,9 @@ pipeline-wfd-appetizer:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-appetizer.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-appetizer.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -236,7 +236,7 @@ pipeline-wfd-entree:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-entree-ic-ad"
-       NAME: "{{pipeline-wfd-entree.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-entree.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8081"
@@ -247,9 +247,9 @@ pipeline-wfd-entree:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-entree.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-entree.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -278,7 +278,7 @@ pipeline-wfd-dessert:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-dessert-ic-ad"
-       NAME: "{{pipeline-wfd-dessert.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-dessert.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8083"
@@ -289,9 +289,9 @@ pipeline-wfd-dessert:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-dessert.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-dessert.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -320,7 +320,7 @@ pipeline-wfd-menu:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-menu-ic-ad"
-       NAME: "{{pipeline-wfd-menu.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-menu.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8180"
@@ -331,9 +331,9 @@ pipeline-wfd-menu:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
-       ROUTE_HOSTNAME: "{{pipeline-wfd-menu.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       ROUTE_HOSTNAME: "{{pipeline-wfd-menu.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        TEST_RESULT_FOR_AD: "1"
        GROUP_SIZE: "1"
        DEBUG: null
@@ -362,7 +362,7 @@ pipeline-wfd-zuul:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-zuul-ic-ad"
-       NAME: "{{pipeline-wfd-zuul.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-zuul.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8080"
@@ -373,7 +373,7 @@ pipeline-wfd-zuul:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{deploy.parameters.menu-apis-endpoint}}"
        TEST_RESULT_FOR_AD: "1"
@@ -404,7 +404,7 @@ pipeline-wfd-menu-ui:
        ORG: "{{deploy.parameters.deploy-organization}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        PATTERN: "wfd-menu-ui-ic-ad"
-       NAME: "{{pipeline-wfd-menu-ui.parameters.configuration.env.PATTERN}}-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       NAME: "{{pipeline-wfd-menu-ui.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
        PORT: "8181"
@@ -415,7 +415,7 @@ pipeline-wfd-menu-ui:
        #AUTO_RECOVERY: "false" -- Commented out due to a bug declaring boolean variables
        CONTAINER_SIZE: "micro"
        IGNORE_MAPPING_ROUTE: "yes"
-       BRIDGE_APP: "container-bridge-app-{{pipeline-wfd-eureka.parameters.configuration.env.UNIQUE_IDENTIFIER}}"
+       BRIDGE_APP: "container-bridge-app-{{deploy.parameters.unique-identifier}}"
        ROUTE_DOMAIN: "{{deploy.parameters.route-domain}}"
        ROUTE_HOSTNAME: "{{deploy.parameters.menu-endpoint}}"
        TEST_RESULT_FOR_AD: "1"
