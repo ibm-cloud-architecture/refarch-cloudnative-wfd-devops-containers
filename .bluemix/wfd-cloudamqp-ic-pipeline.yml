@@ -1,0 +1,143 @@
+---
+stages:
+- name: Create CloudAMQP Service
+  properties:
+  - name: BRIDGE_APP
+    value: ${BRIDGE_APP}
+    type: text
+  - name: REGION
+    value: ${REGION}
+    type: text
+  - name: ORG
+    value: ${ORG}
+    type: text
+  - name: SPACE
+    value: ${SPACE}
+    type: text
+  - name: DEBUG
+    value: ${DEBUG}
+    type: text
+  - name: UNIQUE_IDENTIFIER
+    value: ${UNIQUE_IDENTIFIER}
+    type: text
+  - name: NAME
+    value: ${NAME}
+    type: text
+  - name: APP_NAME
+    value: ${APP_NAME}
+    type: text
+  - name: PLAN
+    value: ${PLAN}
+    type: text
+  jobs:
+  - name: Create Service
+    type: deployer
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+      application: ${APP_NAME}
+    script: |-
+      #!/bin/bash
+
+      # ------ #
+      # Colors #
+      # ------ #
+      export green='\e[0;32m'
+      export red='\e[0;31m'
+      export label_color='\e[0;33m'
+      export no_color='\e[0m' # No Color
+
+      # -------------- #
+      # Set debug mode #
+      # -------------- #
+
+      if [[ -n ${DEBUG} ]]; then set -x ; fi
+
+      echo -e "${label_color}# --------------------------------- #${no_color}"
+      echo -e "${label_color}# [BEGIN]: Create CloudAMQP Service #${no_color}"
+      echo -e "${label_color}# --------------------------------- #${no_color}"
+
+      if [ -n "`cf services | grep ${APP_NAME}`" ]; then
+        cf unbind-service ${BRIDGE_APP} ${APP_NAME}
+        cf delete-service ${APP_NAME} -f
+      fi
+
+      cf create-service ${NAME} ${PLAN} ${APP_NAME}
+      cf bind-service {BRIDGE_APP} ${APP_NAME}
+  - name: Update Microservices
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    PORT: ${PORT}
+    CONTAINER_NAME: ${NAME}
+    DEPLOY_TYPE: simple
+    COMMAND: |-
+      #!/bin/bash
+
+      # -------------- #
+      # Set debug mode #
+      # -------------- #
+
+      if [[ -n ${DEBUG} ]]; then set -x ; fi
+
+      echo -e "${label_color}# ------------------------------- #${no_color}"
+      echo -e "${label_color}# [BEGIN]: Updating microservices #${no_color}"
+      echo -e "${label_color}# ------------------------------- #${no_color}"
+
+      # ------------------ Python spcripts --------------------- #
+      export PYTHONPATH=$EXT_DIR/utilities/:$PYTHONPATH
+
+      export BEARER_TOKEN=`python - <<CODE
+      import python_utils
+      BEARER_TOKEN, SPACE_GUID = python_utils.load_cf_auth_info()
+      print(str(BEARER_TOKEN))
+      CODE`
+      export SPACE_ID=`python - <<CODE
+      import python_utils
+      BEARER_TOKEN, SPACE_GUID = python_utils.load_cf_auth_info()
+      print(str(SPACE_GUID))
+      CODE`
+      # --------------------------------------------------------- #
+
+
+        # For each microservice, we need to update their VCAP_SERVICES so that they point to the new CloudAMQP instance
+        MICROSERVICES=`cf ic group list | grep ${UNIQUE_IDENTIFIER} | grep -e turbine -e menu | sed 's/    .*$//g' | sed 's/^.*  //g'`
+        NEW_CLOUDAMQP_URI=$(cf env ${BRIDGE_APP} | grep amqp:// | sed "s@^.*amqp://@amqp://@g" | sed 's/".*$//g')
+
+      if [ -n "$MICROSERVICES" ]; then
+        for MICROSERVICE in `echo ${MICROSERVICES}`
+        do
+          echo "[INFO]: Updating CloudAMQP credentials for microservice: $MICROSERVICE"
+
+          MICROSERVICE_CONTAINER_GR_ID=`cf ic group list | grep $MICROSERVICE | sed 's/ .*$//g'`
+
+          OLD_VCAP_SERVICES=`cf ic group inspect $MICROSERVICE_CONTAINER_GR_ID | grep 'VCAP_SERVICES=' | sed 's/^.*VCAP_SERVICES=\(.*\)",.*$/\1/g'`
+
+          NEW_VCAP_SERVICES=`echo $OLD_VCAP_SERVICES | sed "s?amqp://[^\]*?${NEW_CLOUDAMQP_URI}?g"`
+          echo "[INFO]: $MICROSERVICE new VCAP Services: $NEW_VCAP_SERVICES"
+
+          RESULT=`curl -s -o /dev/null -w "%{http_code}" -X PATCH \
+                      --header "Content-Type: application/json" \
+                      --header "Accept: application/json" \
+                      --header "X-Auth-Token: ${BEARER_TOKEN}" \
+                      --header "X-Auth-Project-Id: ${SPACE_ID}" \
+                      -d "{\"Environment\":[\"VCAP_SERVICES=${NEW_VCAP_SERVICES}\"],\"NumberInstances\": {}}" \
+                      "https://containers-api.ng.bluemix.net/v3/containers/groups/${MICROSERVICE}"`
+
+          if [ $RESULT -ge 400 ]; then
+            echo -e "${red}Result of curl: $RESULT ${no_color}"
+          else
+            echo -e "${green}Result of curl: $RESULT ${no_color}"
+          fi
+        done
+      else
+        echo -e "${green}[INFO]: There is no microservice to be updated ${no_color}"
+      fi
+
+      echo -e "${label_color}# ----------------------------- #${no_color}"
+      echo -e "${label_color}# [END]: Updating microservices #${no_color}"
+      echo -e "${label_color}# ----------------------------- #${no_color}"
