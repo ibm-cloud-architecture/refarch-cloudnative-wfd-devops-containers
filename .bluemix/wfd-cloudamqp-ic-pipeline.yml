@@ -64,7 +64,7 @@ stages:
       fi
 
       cf create-service ${NAME} ${PLAN} ${APP_NAME}
-      cf bind-service {BRIDGE_APP} ${APP_NAME}
+      cf bind-service ${BRIDGE_APP} ${APP_NAME}
   - name: Update Microservices
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
