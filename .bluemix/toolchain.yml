@@ -429,7 +429,7 @@ pipeline-wfd-turbine:
     name: "9. Turbine Server IC"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-ic-pipeline-template.yml)
+      content: $file(wfd-hystrix-turbine-ic-pipeline.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
@@ -444,7 +444,7 @@ pipeline-wfd-turbine:
        NAME: "{{pipeline-wfd-turbine.parameters.configuration.env.PATTERN}}-{{deploy.parameters.unique-identifier}}"
        LABEL_PREFIX: "toolchain"
        # Deploy stage env variables
-       PORT: "8989"
+       PORT: "8989,8990"
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "2"
        DESIRED_INSTANCES: "1"
@@ -472,7 +472,7 @@ pipeline-wfd-hystrix:
     name: "10. Hystrix Dashboard IC"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-ic-pipeline-template.yml)
+      content: $file(wfd-hystrix-turbine-ic-pipeline.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
