@@ -29,6 +29,9 @@ stages:
   - name: PLAN
     value: ${PLAN}
     type: text
+  - name: IMAGE_NAME
+    value: ${NAME}
+    type: text
   jobs:
   - name: Create Service
     type: deployer
