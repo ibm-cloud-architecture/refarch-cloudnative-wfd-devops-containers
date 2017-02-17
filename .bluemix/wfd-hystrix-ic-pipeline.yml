@@ -199,7 +199,7 @@ stages:
     value: ${RAMPUP_DURATION}
     type: text
   jobs:
-  - name: Deploy Container Group
+  - name: Deploy Container
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
@@ -238,14 +238,35 @@ stages:
 
         # -------------------------------------------------------------------------------------------------------------------- #
 
+        echo -e "${label_color}Checking for containers already deployed....${no_color}"
+        for CONTAINER in `cf ic ps | grep ${CONTAINER_NAME} | awk '{print $1}'`
+        do
+          echo "Found container with ID: ${CONTAINER}"
+          echo "Container will be removed before deploying the new version"
+          cf ic rm -f ${CONTAINER}
+          if [ $? -ne 0 ]; then
+            echo -e "${red}[ERROR]: An error has occurred while removing container ID: ${CONTAINER}${no_color}"
+            exit 1
+          fi
+        done
+        echo -e "${green}All previous containers have been successfully removed${no_color}"
+
         /bin/bash deployscripts/deploycontainer.sh
 
         if [[ ${NAME} == *"hystrix"* ]]; then
-          IP_ADDRESS=`cf ic ip list | grep -e '.*[0-9]\.[0-9].*' | head -n1 | sed 's/ *//g'`
-          CONTAINER_ID=`cf ic ps | grep ${CONTAINER_NAME}_${BUILD_NUMBER} | awk '{print $1}'`
-          cf ic ip bind ${IP_ADDRESS} ${CONTAINER_ID}
-          if [ $? -ne 0 ]; then
-            echo -e "${red}[ERROR]: An error ocurred binding the IP address to the Hystrix container${no_label}"
+          if [ `cf ic ip list | grep -ve '-' | wc -l` -ne 0 ]; then
+            IP_ADDRESS=`cf ic ip list | grep -e '.*[0-9]\.[0-9].*' | grep -ve '-' | head -n1 | sed 's/  *//g'`
+            CONTAINER_ID=`cf ic ps | grep ${CONTAINER_NAME}_${BUILD_NUMBER} | awk '{print $1}'`
+            cf ic ip bind ${IP_ADDRESS} ${CONTAINER_ID}
+            if [ $? -ne 0 ]; then
+              echo -e "${red}[ERROR]: An error ocurred binding the IP address to the Hystrix container${no_label}"
+              exit 1
+            else
+              echo -e "${green}IP address ${IP_ADDRESS} successfully bound to container ${CONTAINER_ID} ${no_color}"
+            fi
+          else
+            echo -e "${red}[ERROR]: There are no IP addresses available to bind to the Hystrix Dashboard${no_color}"
+            echo -e "${red}[ERROR]: Please, request a new IP address${no_color}"
             exit 1
           fi
         fi
