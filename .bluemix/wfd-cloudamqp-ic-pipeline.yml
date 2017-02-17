@@ -107,7 +107,7 @@ stages:
       # --------------------------------------------------------- #
 
 
-        # For each microservice, we need to update their VCAP_SERVICES so that they point to the new CloudAMQP instance
+        # For each microservice deployed as container group, we need to update their VCAP_SERVICES so that they point to the new CloudAMQP instance
         MICROSERVICES=`cf ic group list | grep ${UNIQUE_IDENTIFIER} | grep -e turbine -e menu | sed 's/    .*$//g' | sed 's/^.*  //g'`
         NEW_CLOUDAMQP_URI=$(cf env ${BRIDGE_APP} | grep amqp:// | sed "s@^.*amqp://@amqp://@g" | sed 's/".*$//g')
 
@@ -138,8 +138,9 @@ stages:
           fi
         done
       else
-        echo -e "${green}[INFO]: There is no microservice to be updated ${no_color}"
+        echo -e "${green}[INFO]: There is no microservice deployed as container group to be updated ${no_color}"
       fi
+
 
       echo -e "${label_color}# ----------------------------- #${no_color}"
       echo -e "${label_color}# [END]: Updating microservices #${no_color}"

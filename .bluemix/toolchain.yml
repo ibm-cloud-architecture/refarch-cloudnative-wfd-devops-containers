@@ -429,7 +429,7 @@ pipeline-wfd-turbine:
     name: "9. Turbine Server IC"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-hystrix-turbine-ic-pipeline.yml)
+      content: $file(wfd-ic-pipeline-template.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
@@ -472,7 +472,7 @@ pipeline-wfd-hystrix:
     name: "10. Hystrix Dashboard IC"
     ui-pipeline: true
     configuration:
-      content: $file(wfd-hystrix-turbine-ic-pipeline.yml)
+      content: $file(wfd-hystrix-ic-pipeline.yml)
       env:
        # Build java stage env variables
        DOCKER_DIR: "docker"
