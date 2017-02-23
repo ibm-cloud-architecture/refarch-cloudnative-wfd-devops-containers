@@ -4,6 +4,13 @@
 
 This repository contains the DevOps toolchain for managing and deploying the Java microservices making up the What's For Dinner app to Bluemix in IBM Containers.
 
+### Before you start
+
+Before you hit the Create Toolchain button, make sure you have:
+
+1. A [Bluemix account](https://console.ng.bluemix.net/registration/)
+2. A namespace set for your IBM Containers (more info [here](https://console.ng.bluemix.net/docs/containers/container_cli_reference_cfic.html#container_cli_reference_cfic__namespace))
+
 ### How to use
 
 In order to create a toolchain for the What's For Dinner Microservices Reference Application, please click below on the __Create toolchain__ button and follow the instructions.
