@@ -4,6 +4,8 @@
 
 This repository contains the DevOps toolchain for managing and deploying the Java microservices making up the What's For Dinner app to Bluemix in IBM Containers.
 
+_The What’s for Dinner application has been developed and designed to run in the **IBM Bluemix us-south public region** and, accordingly, its toolchain too. Changes may be required to the toolchain if the What’s for Dinner application is to run on a different IBM Bluemix public region or on a local/dedicated environment. For local/dedicated deployments see material in the [DEDICATED](https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-devops-containers/tree/DEDICATED) branch_
+
 ### Before you start
 
 Before you hit the Create Toolchain button, make sure you have:
