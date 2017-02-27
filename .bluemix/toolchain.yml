@@ -6,6 +6,7 @@ In this window, you will be asked to specify the following properties for your t
 2. Click on the __GitHub__ icon. This opens the GitHub settings. Please, give your desired name to each of the repos that will be cloned. \n\
 3. Click on the __Delivery Pipeline__ icon. This opens the delivery pipeline settings: \n\n\
 \t - Specify the __Bluemix domain__ where your app will be hosted *(by default: mybluemix.net)*. \n\
+\t - Specify the __IBM Bluemix Containers Service API url__ to work with the IBM Bluemix Containers Service in local/dedicated *(by default: container-api.BMX_DOMAIN)*. \n\
 \t - Specify the __build branch__ you would like your delivery pipelines to build the code from *(by default: master)*. \n\
 \t - Specify your __app and APIs endpoints__ which must be __unique__ within Bluemix public *(by default: \"mymenu\" and \"menu-apis\" respectively)*. \n\
 \t - Specify a __unique identifier__ which will be used to make the What's For Dinner microservices and their routing __unique within Bluemix public__ *(by default: toolchain's creation timestamp)*. \n\
