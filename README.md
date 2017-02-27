@@ -4,6 +4,8 @@
 
 This repository contains the DevOps toolchain for managing and deploying the Java microservices making up the What's For Dinner app to Bluemix in IBM Containers.
 
+_The What’s for Dinner application has been developed and designed to run in the **IBM Bluemix us-south public region** and, accordingly, its toolchain too. Changes may be required to the toolchain if the What’s for Dinner application is to run on a different IBM Bluemix public region or on a local/dedicated environment. For local/dedicated deployments see material in the [DEDICATED](https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-devops-containers/tree/DEDICATED) branch_
+
 ### Before you start
 
 Before you hit the Create Toolchain button, make sure you have:
@@ -36,8 +38,14 @@ In order to create a toolchain for the What's For Dinner Microservices Reference
 
 This RESILIENCY branch of the What's For Dinner DevOps GitHub repository not only implements the same toolchain as the master branch but also includes the new resiliency artifacts for the What's For Dinner app in its implementation.
 
-These new elements are the Netflix OSS component Hystrix (metrics and circuit breaker), The Netflix OSS component Turbine (metric aggregator) and the CloudAMQP service (Managed HA RabbitMQ Server) for integration of these resiliency pieces with the existing microservices making up the What's For Dinner app. For further detail on these new components as well as on this new architecture that includes the resiliency pieces for the What's For Dinner app, please read the resiliency branch main app's [readme](https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix/tree/RESILIENCY).
+These new elements are:
 
-The CloudAMQP service is used for integrating all resiliency pieces (Menu and Menu UI microservices and Turbine microservice). Therefore, the CloudAMQP service must be created and deployed before the resiliency pieces aforementioned (pipelines are numbered so that they are executed in the right order). The CloudAMQP delivery pipeline will create a new CloudAMQP service. If there is an existing CloudAMQP service already, the CloudAMQP delivery pipeline will unbind it from the container bridge app (remember that containerised microservices can only read VCAP services from Cloud Foundry apps) and then delete it before creating the new one. Finally, it will bind the new CloudAMQP service to the container bridge app and update the VCAP services of the microservices resiliency wise involved.
+1. Hystrix - A Netflix OSS component for metrics and circuit breaker
+2. Turbine - A Netflix OSS component for metric aggregations
+3. Message queue - for the integration of these resiliency pieces with the existing microservices making up the What's For Dinner app.
+
+For further detail on these new components as well as on this new architecture that includes the resiliency pieces for the What's For Dinner app, please read the resiliency branch main app's [readme](https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix/tree/RESILIENCY).
+
+The service used for implementing a message queue is the IBM Bluemix CloudAMQP service, a managed HA RabbitMQ Server. It is used for integrating all resiliency pieces (Menu, Menu UI and Turbine microservices). Therefore, the CloudAMQP service must be created and deployed before the resiliency pieces aforementioned (pipelines are numbered so that they are executed in the right order). The CloudAMQP delivery pipeline will create a new CloudAMQP service. If there is an existing CloudAMQP service already, the CloudAMQP delivery pipeline will unbind it from the container bridge app (remember that containerised microservices can only read VCAP services from Cloud Foundry apps) and then delete it before creating the new one. Finally, it will bind the new CloudAMQP service to the container bridge app and update the VCAP services of the microservices resiliency wise involved.
 
 After deploying Menu and Menu UI microservices, which are the only microservices implementing Hystrix metrics and the Hystrix Circuit Breaker pattern, the Netflix OSS component Turbine gets deployed, so that metrics can get aggregated for later display in the Hystrix dashboard. Finally,the Netflix OSS component Hystrix gets deployed.

@@ -1,6 +1,6 @@
 ---
 stages:
-- name: Create CloudAMQP Service
+- name: Create MQ Service
   properties:
   - name: BRIDGE_APP
     value: ${BRIDGE_APP}
@@ -33,7 +33,7 @@ stages:
     value: ${NAME}
     type: text
   jobs:
-  - name: Create Service
+  - name: Create CloudAMQP Service
     type: deployer
     target:
       region_id: ${REGION}
