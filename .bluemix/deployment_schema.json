@@ -36,9 +36,13 @@
         "unique-identifier": {
             "description": "Unique identifier for your apps. Example: your surname",
             "type": "string"
+        },
+        "containers-api": {
+            "description": "IBM Bluemix Containers Service API url. See cf ic info command.",
+            "type": "string"
         }
     },
-    "required": ["deploy-region", "deploy-organization", "deploy-space", "menu-endpoint", "menu-apis-endpoint", "route-domain", "branch", "unique-identifier"],
+    "required": ["deploy-region", "deploy-organization", "deploy-space", "menu-endpoint", "menu-apis-endpoint", "route-domain", "branch", "unique-identifier", "containers-api"],
     "form": [
         {
             "type": "validator",
@@ -49,6 +53,12 @@
             "readonly": false,
             "title": "Domain name for all routes",
             "key": "route-domain"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "IBM Bluemix Containers Service API url",
+            "key": "containers-api"
         },
         {
             "type": "text",
