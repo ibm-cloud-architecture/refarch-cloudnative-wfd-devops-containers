@@ -2,50 +2,36 @@
 
 ## Microservices Reference Application - What's For Dinner Toolchain (IBM Containers)
 
-This repository contains the DevOps toolchain for managing and deploying the Java microservices making up the What's For Dinner app to Bluemix in IBM Containers.
+This repository contains the IBM DevOps Toolchain for managing and deploying the Java microservices making up the What's For Dinner app to an __IBM Bluemix local/dedicated environment__.
 
-_The What’s for Dinner application has been developed and designed to run in the **IBM Bluemix us-south public region** and, accordingly, its toolchain too. Changes may be required to the toolchain if the What’s for Dinner application is to run on a different IBM Bluemix public region or on a local/dedicated environment. For local/dedicated deployments see material in the [DEDICATED](https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-devops-containers/tree/DEDICATED) branch_
+The aim of this README file is to point out differences between public and local/dedicated deployment. For general info and configuration of the What's for Dinner's IBM DevOps Toolchain, __please do read [RESILIENCY](https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-devops-containers/tree/RESILIENCY) branch first__.
 
-### Before you start
-
-Before you hit the Create Toolchain button, make sure you have:
-
-1. A [Bluemix account](https://console.ng.bluemix.net/registration/)
-2. A namespace set for your IBM Containers (more info [here](https://console.ng.bluemix.net/docs/containers/container_cli_reference_cfic.html#container_cli_reference_cfic__namespace))
-
-### How to use
-
-In order to create a toolchain for the What's For Dinner Microservices Reference Application, please click below on the __Create toolchain__ button and follow the instructions.
-
-[![Create wfd Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-devops-containers.git&branch=RESILIENCY)
-
-1. The "What is for dinner Toolchain" creation view will open.
-2. In this window, you will be asked to specify the following properties for your toolchain:
- 1. Specify a name for your toolchain that is __unique__ among all toolchains on your Bluemix namespace DevOps section.
- 2. Click on the __GitHub__ icon. This opens the GitHub settings. Please, give your desired name to each of the repos that will be cloned.
- 3. Click on the __Delivery Pipeline__ icon. This opens the delivery pipeline settings:
-   * Specify the __Bluemix domain__ where your app will be hosted *(by default: mybluemix.net)*.
-    * Specify the __build branch__ you would like your delivery pipelines to build the code from *(by default: master)*.
-     * Specify your __app and APIs endpoints__ which must be __unique__ within Bluemix public *(by default: "mymenu" and "menu-apis" respectively)*.
-      * Specify a __unique identifier__ which will be used to make the What's For Dinner microservices and their routing __unique within Bluemix public__ *(by default: toolchain's creation timestamp)*.
-3. Click the Create button to complete the toolchain creation.
-4. After creating the toolchain, make sure to deploy the What's For Dinner microservices in the following order:
- 1. The Eureka server, by running the Eureka IC delivery pipeline.
- 2. The Config server, by running the Config Server IC delivery pipeline.
- 3. All other microservices, by executing their delivery pipelines.
+[![Create wfd Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-wfd-devops-containers.git&branch=DEDICATED)
 
 ### Details
 
-This RESILIENCY branch of the What's For Dinner DevOps GitHub repository not only implements the same toolchain as the master branch but also includes the new resiliency artifacts for the What's For Dinner app in its implementation.
+Main differences between deploying the What's for Dinner application onto an IBM Bluemix public region and a local/dedicated environment are:
 
-These new elements are:
+1. Bluemix domain.
+2. IBM Bluemix Containers Service's API url.
+3. IBM Bluemix Services.
 
-1. Hystrix - A Netflix OSS component for metrics and circuit breaker
-2. Turbine - A Netflix OSS component for metric aggregations
-3. Message queue - for the integration of these resiliency pieces with the existing microservices making up the What's For Dinner app.
+#### Bluemix domain
 
-For further detail on these new components as well as on this new architecture that includes the resiliency pieces for the What's For Dinner app, please read the resiliency branch main app's [readme](https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix/tree/RESILIENCY).
+The Bluemix domain must change appropriately so that it is now your local/dedicated bluemix domain. This can be done during this toolchain creation process.
 
-The service used for implementing a message queue is the IBM Bluemix CloudAMQP service, a managed HA RabbitMQ Server. It is used for integrating all resiliency pieces (Menu, Menu UI and Turbine microservices). Therefore, the CloudAMQP service must be created and deployed before the resiliency pieces aforementioned (pipelines are numbered so that they are executed in the right order). The CloudAMQP delivery pipeline will create a new CloudAMQP service. If there is an existing CloudAMQP service already, the CloudAMQP delivery pipeline will unbind it from the container bridge app (remember that containerised microservices can only read VCAP services from Cloud Foundry apps) and then delete it before creating the new one. Finally, it will bind the new CloudAMQP service to the container bridge app and update the VCAP services of the microservices resiliency wise involved.
+#### IBM Bluemix Containers Service's API
 
-After deploying Menu and Menu UI microservices, which are the only microservices implementing Hystrix metrics and the Hystrix Circuit Breaker pattern, the Netflix OSS component Turbine gets deployed, so that metrics can get aggregated for later display in the Hystrix dashboard. Finally,the Netflix OSS component Hystrix gets deployed.
+IBM Bluemix Containers Service is an IBM Bluemix service which is fully supported in IBM Bluemix public cloud but __might not__ be so in local/dedicated environments. Therefore, you must figure out what the level of support for IBM Bluemix Containers Service in your local/dedicated environment is first.
+
+Afterwards, if IBM Bluemix Containers Service is fully supported in your environment, you must appropriately specify your IBM Bluemix Containers Service's API url during this toolchain creation. You can figure this out by executing the following command:
+
+**`cf ic info`**
+
+#### IBM Bluemix Services
+
+Likewise the IBM Bluemix Containers Service, there might be other IBM Bluemix services not available in you local/dedicated environment. In this case, the IBM Bluemix CloudAMQP service used to implement the message queue component of the architecture in the IBM Bluemix public cloud is most likely to be unavailable in your local/dedicated environment. However, Compose RabbitMQ might well be available.
+
+As a result, changes have been made to the What's for Dinner application's toolchain so that it deploys a Compose RabbitMQ service and configure the various components of the application to use this service rather than the default IBM Bluemix CloudAMQP service.
+
+Toolchain components changed to accommodate Compose RabbitMQ are the message queue component deployed plus the configuration of the menu, menu UI and turbine microservices. Since these last mentioned microservices need different credential variables to connect to Compose RabbitMQ, a new DEDICATED branch has been created for them and the toolchain will build these microservices out of those branches as a result.
