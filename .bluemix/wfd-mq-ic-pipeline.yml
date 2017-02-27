@@ -32,6 +32,9 @@ stages:
   - name: IMAGE_NAME
     value: ${NAME}
     type: text
+  - name: CONTAINER_API
+    value: ${CONTAINER_API}
+    type: text
   jobs:
   - name: Create CloudAMQP Service
     type: deployer
@@ -129,7 +132,7 @@ stages:
                       --header "X-Auth-Token: ${BEARER_TOKEN}" \
                       --header "X-Auth-Project-Id: ${SPACE_ID}" \
                       -d "{\"Environment\":[\"VCAP_SERVICES=${NEW_VCAP_SERVICES}\"],\"NumberInstances\": {}}" \
-                      "https://containers-api.ng.bluemix.net/v3/containers/groups/${MICROSERVICE}"`
+                      "https://${CONTAINER_API}/v3/containers/groups/${MICROSERVICE}"`
 
           if [ $RESULT -ge 400 ]; then
             echo -e "${red}Result of curl: $RESULT ${no_color}"
